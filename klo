@@ -1,0 +1,58 @@
+package com.kirilcorp.cityview
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
+import com.kirilcorp.cityview.databinding.FragmentDetailBinding
+
+class DetailFragment : Fragment() {
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        val binding = DataBindingUtil.inflate<FragmentDetailBinding>(inflater,
+            R.layout.fragment_detail,container,false)
+        binding.infoGeneral.text=generateSities()[1].descriptio
+        return binding.root
+    }
+
+    private fun generateSities(): ArrayList<Sities>?{
+        val sitiesString = readSitiesJsonFile()
+        var takeSities: ArrayList<Sities>? = null
+        try {
+            val sitiesJson = JSONArray(sitiesString)
+            for (i in 0 until sitiesJson.length()) {
+                val siteJson = sitiesJson.getJSONObject(i)
+                val site = Sities(
+                    siteJson.getString("name"),
+                    siteJson.getString("descriptio"),
+                    siteJson.getString("score"),
+                    siteJson.getString("image")
+                )
+                takeSities.add(site)
+            }
+        } catch (e: JSONException) {
+            e.printStackTrace()
+        }
+        return takeSities
+    }
+
+    private fun readSitiesJsonFile(): String? {
+        var sitiesString: String? = null
+        try {
+            val inputStream = requireActivity().assets.open("mock_sities.json")
+            val size = inputStream.available()
+            val buffer = ByteArray(size)
+            inputStream.read(buffer)
+            inputStream.close()
+            sitiesString = String(buffer)
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+        return sitiesString
+    }
+}
